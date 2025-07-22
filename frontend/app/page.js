@@ -5,14 +5,17 @@ export default function Home() {
   const [todos, setTodos] = useState([]);
   const [text, setText] = useState('');
 
+  const [changeText, setChangeText] = useState('');
+  const [editId, setEditId] = useState(null);
+
   useEffect(() => {
-    fetch('http://localhost:5000/api/todos')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos`)
       .then(res => res.json())
       .then(setTodos);
   }, []);
 
   const handleAdd = async () => {
-    const res = await fetch('http://localhost:5000/api/todos', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text }),
@@ -23,10 +26,21 @@ export default function Home() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:5000/api/todos/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos/${id}`, {
       method: 'DELETE',
     });
     setTodos(todos.filter(t => t.id !== id));
+  };
+
+  const handleModify = async text => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/todos/${editId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({ text }),
+    });
+    const body = await res.json();
+    setTodos(todos.map(todo => todo.id === editId ? body : todo));
+    setEditId(null);
   };
 
   return (
@@ -38,9 +52,17 @@ export default function Home() {
       <ul>
         {todos.map(todo => (
           <li key={todo.id}>
-            {todo.text} <button onClick={() => handleDelete(todo.id)}>X</button>
+            {editId === todo.id ? <div>
+                <input type="text" id="selected" value={changeText} onChange={e => setChangeText(e.target.value)}></input>
+                <button onClick={() => handleModify(changeText)}>save</button>
+              </div> : todo.text} <button onClick={() => handleDelete(todo.id)}>X</button>
+            <button onClick={() => {
+                setEditId(todo.id); 
+                setChangeText(todo.text);
+            }}>M</button>
           </li>
         ))}
+
       </ul>
     </main>
   );

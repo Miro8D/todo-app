@@ -22,4 +22,12 @@ router.delete('/:id', async (req, res) => {
   res.sendStatus(204);
 });
 
+// Modify a todo
+router.patch('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { text } = req.body;
+  const result = await db.query('UPDATE todos SET text = $1 WHERE id = $2 RETURNING *', [text, id]);
+  res.status(201).json(result.rows[0]);
+});
+
 module.exports = router;
