@@ -16,7 +16,7 @@ export default function SignupPage() {
                 "Content-Type": "application/json",
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({username:user, password:pass}),
+            body: JSON.stringify({username:user, password:btoa(pass)}),
         });
         if (res.ok) {
             const data = await res.json();

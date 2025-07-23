@@ -2,24 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const jwt = require('jsonwebtoken');
-
-
-// JWT TODO: Make this code in a seperate file
-function authMiddleware(req, res, next){
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.split(' ')[1];
-    
-    if (!token) return res.sendStatus(401);
-    
-    try{
-        const user = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = user;
-        next();
-    } catch (err) {
-        res.sendStatus(403);
-    }
-
-}
+const { authMiddleware } = require('../authMiddleware');
 
 // Get all todos
 router.get('/', authMiddleware, async (req, res) => {
@@ -45,7 +28,7 @@ router.delete('/:id',authMiddleware, async (req, res) => {
 router.patch('/:id',authMiddleware, async (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
-  const result = await db.query('UPDATE todos SET text = $1 WHERE id = $2 AND user_id = $3 RETURNING *', [text, id, user.req.id]);
+  const result = await db.query('UPDATE todos SET text = $1 WHERE id = $2 AND user_id = $3 RETURNING *', [text, id, req.user.id]);
   res.status(201).json(result.rows[0]);
 });
 
