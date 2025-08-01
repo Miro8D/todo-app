@@ -18,7 +18,7 @@ router.post('/signup', async (req, res) => {
     await db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
     
     const userid = (await db.query('SELECT id FROM users WHERE username = $1', [username])).rows[0].id;
-    const token = jwt.sign({ id: userid }, process.env.JWT_SECRET, { expiresIn: '1h'})
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h'})
 
     return res.status(201).json({ token });
 });
@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.sendStatus(401);
     
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h'})
+    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h'})
 
     return res.status(202).json( { token })
     

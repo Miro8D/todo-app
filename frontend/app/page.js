@@ -2,13 +2,24 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { jwtDecode } from 'jwt-decode';
 
 export default function Home() {
   const router = useRouter();
   useEffect(() => {
-    if (localStorage.getItem('token')){
-      router.push('/todo');
-    }
+    const token = localStorage.getItem('token')
+    if (token){
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp < Date.now() / 1000) {
+          localStorage.removeItem('token');
+          router.push('/login');
+        } else router.push('/todo');
+      } catch (err) {
+        console.error('Failed to decode JWT:', err);
+        localStorage.removeItem('token');
+      }
+    } else return;
   }, []);
 
   return (

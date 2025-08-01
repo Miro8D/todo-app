@@ -7,9 +7,11 @@ function authMiddleware(req, res, next){
     if (!token) return res.sendStatus(401);
     
     try{
-        const user = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = user;
-        next();
+        const user = jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+            if (err) return res.sendStatus(401);
+            req.user = user;
+            next();
+        });
     } catch (err) {
         res.sendStatus(403);
     }
