@@ -60,11 +60,13 @@ router.delete('/:id',authMiddleware, async (req, res) => {
   const imagePath = imageResult.rows[0]?.image_url;
   
   if (imagePath) {
-    fs.unlink(path.join(__dirname, '..', imagePath), (err) => {
-      if (err) {
-        console.error('Error deleting image: ', err);
-      }
-    })
+    try{
+      fs.unlink(path.join(__dirname, '..', imagePath), (err) => {
+        if (err) {
+          console.error('Error deleting image: ', err);
+        }
+      })
+    } catch (err) console.error(err);
   }
 
   await db.query('DELETE FROM todos WHERE id = $1 AND user_id = $2', [id, req.user.id]);
