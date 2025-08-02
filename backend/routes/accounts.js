@@ -17,8 +17,13 @@ router.post('/signup', async (req, res) => {
     const hash = await bcrypt.hash(req.body.password, 10);
     await db.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hash]);
     
-    const userid = (await db.query('SELECT id FROM users WHERE username = $1', [username])).rows[0].id;
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h'})
+    const user = (await db.query('SELECT id, username FROM users WHERE username = $1', [username])).rows[0];
+
+    const token = jwt.sign(
+        { id: user.id, username: user.username },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
 
     return res.status(201).json({ token });
 });
