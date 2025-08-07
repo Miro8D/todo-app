@@ -3,7 +3,7 @@ const cors = require('cors');
 const todosRouter = require('./routes/todos');
 const accountsRouter = require('./routes/accounts');
 
-const uploadsDir = process.env.UPLOADDIR;
+const uploadsDir = process.env.UPLOADDIR || "/uploads";
 
 const app = express();
 app.use(cors());

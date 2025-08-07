@@ -42,8 +42,8 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
     return res.status(400).json({error: 'title is required'});
   }
 
-  const imagePath = req.file ? req.file.path : null;
-
+  const imagePath = req.file ? 'uploads/' + req.file.filename : null;
+  console.log(imagePath);
   try {
     const result = await db.query('INSERT INTO todos (title, user_id, description, image_url) VALUES ($1, $2, $3, $4) RETURNING *', [title, req.user.id, description, imagePath]);
     res.json(result.rows[0]);
@@ -61,7 +61,7 @@ router.delete('/:id',authMiddleware, async (req, res) => {
   
   if (imagePath) {
     try{
-      fs.unlink(path.join(__dirname, '..', imagePath), (err) => {
+      fs.unlink(path.join(imagePath), (err) => {
         if (err) {
           console.error('Error deleting image: ', err);
         }
